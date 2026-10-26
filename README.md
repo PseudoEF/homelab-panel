@@ -6,6 +6,8 @@ A dependency-free control panel for a Termux/Android homelab. It shows CPU, memo
 
 A phone is a useful low-power server, but SSH-only administration is slow. This panel puts the few things needed for day-to-day operation on one screen without a database, a framework, a bundler, or a third-party monitoring service.
 
+![Panel overview](docs/screenshot.png)
+
 The design is deliberately small:
 
 - one Node.js HTTP server using only the standard library;
