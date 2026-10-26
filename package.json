@@ -1,0 +1,15 @@
+{
+  "name": "homelab-panel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LAN-only control panel for a Termux homelab, with a separate read-only public demo",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "set-password": "node server.js --set-password",
+    "test": "node --check server.js && node --check public/app.js && node --test"
+  }
+}

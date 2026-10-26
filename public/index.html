@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Moto G60 — Server Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ВХОД -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <rect x="2" y="2" width="20" height="8" rx="2"/>
+          <rect x="2" y="14" width="20" height="8" rx="2"/>
+          <circle cx="6" cy="6" r="1" fill="currentColor"/>
+          <circle cx="6" cy="18" r="1" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="login-title">Moto G60 Node</div>
+      <div class="login-sub">Termux Homelab Server</div>
+    </div>
+
+    <form id="login-form" autocomplete="off">
+      <div class="input-wrap">
+        <input id="login-password" type="password" placeholder="Пароль доступа" autofocus required/>
+      </div>
+      <button type="submit" class="btn-primary">Войти в панель</button>
+    </form>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+<div id="app" class="hidden">
+  
+  <!-- ШАПКА В СТИЛЕ KOKONUTUI -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">
+        <div class="topbar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="2" y="2" width="20" height="8" rx="2"/>
+            <rect x="2" y="14" width="20" height="8" rx="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/>
+            <line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+        </div>
+        <div class="topbar-meta">
+          <div class="topbar-host">
+            <span id="host-name">moto-g60</span>
+            <span class="live-pill"><span id="conn-dot" class="dot"></span> live</span>
+          </div>
+          <div class="topbar-uptime" id="host-uptime">аптайм —</div>
+        </div>
+      </div>
+
+      <!-- НАВИГАЦИЯ ПО ВКЛАДКАМ -->
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-monitor">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Мониторинг
+        </button>
+        <button class="tab-btn" data-tab="tab-projects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Проекты
+          <span class="tab-count" id="projects-count">1</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="topbar-actions">
+      <button id="btn-password" class="btn-ghost" title="Сменить пароль">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Пароль</span>
+      </button>
+      <button id="btn-refresh" class="btn-ghost" title="Обновить данные">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+        <span>Обновить</span>
+      </button>
+      <button id="btn-logout" class="btn-ghost danger" title="Выйти">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
+  <main class="main">
+
+    <!-- ═══════════════════════════════════════════
+         ВКЛАДКА 1: МОНИТОРИНГ
+         ═══════════════════════════════════════════ -->
+    <div id="tab-monitor" class="tab-pane active">
+      
+      <!-- РЕСУРСЫ СИСТЕМЫ (КОМПАКТНЫЕ КАРТОЧКИ) -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Системные ресурсы</span>
+        </div>
+
+        <div id="gauges" class="gauges-grid">
+          <!-- CPU -->
+          <div class="gauge-card" id="g-cpu">
+            <div class="g-header">
+              <span class="g-label">CPU (Load)</span>
+              <span class="g-badge badge-cpu" id="cpu-badge">8 ядер</span>
+            </div>
+            <div class="g-main-val">
+              <span class="g-value">—</span>
+            </div>
+            <div class="meter-bar"><div class="bar"><i></i></div></div>
+            <div class="g-sub" id="cpu-sub">1м · 5м · 15м</div>
+          </div>
+
+          <!-- RAM -->
+          <div class="gauge-card" id="g-ram">
+            <div class="g-header">
+              <span class="g-label">RAM Память</span>
+              <span class="g-value">0%</span>
+            </div>
+            <div class="g-main-val">
+              <span class="g-ram-used">—</span>
+            </div>
+            <div class="meter-bar"><div class="bar"><i></i></div></div>
+            <div class="g-sub">Оперативная память</div>
+          </div>
+
+          <!-- SWAP -->
+          <div class="gauge-card" id="g-swap">
+            <div class="g-header">
+              <span class="g-label">ZRAM / Swap</span>
+              <span class="g-value">0%</span>
+            </div>
+            <div class="g-main-val">
+              <span class="g-swap-used">—</span>
+            </div>
+            <div class="meter-bar"><div class="bar"><i></i></div></div>
+            <div class="g-sub">Своп устройства</div>
+          </div>
+
+          <!-- DISK -->
+          <div class="gauge-card" id="g-disk">
+            <div class="g-header">
+              <span class="g-label">Диск /data</span>
+              <span class="g-value">0%</span>
+            </div>
+            <div class="g-main-val">
+              <span class="g-disk-used">—</span>
+            </div>
+            <div class="meter-bar"><div class="bar"><i></i></div></div>
+            <div class="g-sub">Внутренний накопитель</div>
+          </div>
+
+          <!-- BATTERY -->
+          <div class="gauge-card" id="g-bat">
+            <div class="g-header">
+              <span class="g-label">Батарея</span>
+              <span class="g-value">100%</span>
+            </div>
+            <div class="g-main-val">
+              <span class="g-bat-status">FULL</span>
+            </div>
+            <div class="meter-bar"><div class="bar"><i></i></div></div>
+            <div class="g-sub" id="bat-sub">—</div>
+          </div>
+
+          <!-- SOC TEMP -->
+          <div class="gauge-card" id="g-soc">
+            <div class="g-header">
+              <span class="g-label">SoC Чипсет</span>
+              <span class="g-badge badge-temp">Snapdragon</span>
+            </div>
+            <div class="g-main-val">
+              <span class="g-value">—°C</span>
+            </div>
+            <div class="meter-bar"><div class="bar"><i></i></div></div>
+            <div class="g-sub">Температура процессора</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ГРАФИКИ НАГРУЗКИ -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Динамика в реальном времени</span>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <span>Load Average</span>
+              <span class="chart-legend"><i style="background:#6366f1"></i> Нагрузка · % от 8 ядер</span>
+            </div>
+            <svg id="chart-cpu" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <span>Использование RAM, %</span>
+              <span class="chart-legend"><i style="background:#22c55e"></i> Память</span>
+            </div>
+            <svg id="chart-ram" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <span>Сетевой трафик, КБ/с</span>
+              <span class="chart-legend"><i style="background:#38bdf8"></i> RX <i style="background:#22c55e;margin-left:6px"></i> TX</span>
+            </div>
+            <svg id="chart-net" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ТЕМПЕРАТУРЫ И ЧАСТОТЫ (АККУРАТНО СКРЫТЫЕ ПО УМОЛЧАНИЮ) -->
+      <section class="section">
+        <div class="panel-card">
+          <div class="panel-card-head">
+            <div>
+              <div class="card-title">Температуры и тактовые частоты</div>
+              <div class="card-desc" id="temp-summary">Сводка датчиков...</div>
+            </div>
+            <button id="btn-temps" class="btn-subtle">Показать все датчики</button>
+          </div>
+          <!-- Скрыто по умолчанию! Не засоряет экран -->
+          <div id="temps" class="chips-container hidden"></div>
+          <div id="freqs" class="freqs-bar"></div>
+        </div>
+      </section>
+
+      <!-- СИСТЕМНЫЕ СЕРВИСЫ -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Системные демоны (runit)</span>
+        </div>
+        <div class="panel-card table-card">
+          <table class="services-table">
+            <thead>
+              <tr>
+                <th>Сервис</th>
+                <th>Состояние</th>
+                <th>PID</th>
+                <th>Время работы</th>
+                <th style="text-align: right;">Управление</th>
+              </tr>
+            </thead>
+            <tbody id="services-body">
+              <tr><td colspan="5" class="table-empty">Загрузка сервисов...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ЛОГИ -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Системный журнал</span>
+        </div>
+        <div class="panel-card terminal-card">
+          <div class="terminal-toolbar">
+            <div class="toolbar-left">
+              <select id="log-select" class="select-input"></select>
+              <label class="toggle-label">
+                <input id="log-auto" type="checkbox" checked/>
+                <span>Автопрокрутка</span>
+              </label>
+            </div>
+            <button id="btn-log-refresh" class="btn-subtle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+              Обновить лог
+            </button>
+          </div>
+          <pre id="log-view" class="terminal-view">Ожидание выбора сервиса...</pre>
+        </div>
+      </section>
+
+      <!-- ОПАСНАЯ ЗОНА: ПЕРЕЗАГРУЗКА -->
+      <section class="section">
+        <div class="danger-panel">
+          <div>
+            <div class="danger-title">Перезагрузка устройства</div>
+            <div class="danger-desc" id="reboot-note">Все сервисы Termux автоматически поднимутся через Termux:Boot после рестарта.</div>
+          </div>
+          <button id="btn-reboot" class="btn-danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Перезагрузить телефон
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ВКЛАДКА 2: ПРОЕКТЫ И ПОРТФОЛИО
+         ═══════════════════════════════════════════ -->
+    <div id="tab-projects" class="tab-pane">
+      <div class="section-head between">
+        <div>
+          <span class="section-title">Проекты сервера</span>
+          <p class="section-subtitle">Управление веб-приложениями, ботами и демо-проектами портфолио</p>
+        </div>
+        <button id="btn-add-project" class="btn-primary-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Добавить проект
+        </button>
+      </div>
+
+      <!-- СЕТКА КАРТОЧЕК ПРОЕКТОВ -->
+      <div id="projects-grid" class="projects-grid">
+        <!-- Генерируется из JS -->
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div id="modal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <div id="modal-title" class="modal-title">Подтверждение</div>
+    <div id="modal-body" class="modal-body">Вы уверены?</div>
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn-ghost">Отмена</button>
+      <button id="modal-ok" class="btn-danger-confirm">Подтвердить</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ДОБАВЛЕНИЯ ПРОЕКТА -->
+<div id="project-modal" class="modal-backdrop hidden">
+  <div class="modal-card wide">
+    <div class="modal-title">Новый проект на сервере</div>
+    <form id="project-form" class="project-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ID проекта (латиница без пробелов)</label>
+          <input type="text" id="p-id" placeholder="my-crm" required pattern="[a-z0-9_-]+"/>
+        </div>
+        <div class="form-group">
+          <label>Название проекта</label>
+          <input type="text" id="p-name" placeholder="Tech CRM Dashboard" required/>
+        </div>
+        <div class="form-group full">
+          <label>Описание</label>
+          <input type="text" id="p-desc" placeholder="Панель тикетов и мониторинга для техотдела"/>
+        </div>
+        <div class="form-group">
+          <label>Порт сервиса</label>
+          <input type="number" id="p-port" placeholder="3001" required min="1024" max="65535"/>
+        </div>
+        <div class="form-group">
+          <label>Тип стека</label>
+          <select id="p-type" class="select-input">
+            <option value="nextjs">Next.js / React</option>
+            <option value="node">Node.js (Express / Fastify)</option>
+            <option value="python">Python (FastAPI / Flask / Bot)</option>
+            <option value="static">Static Web / Nginx</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Домен (например, nic.ua / Cloudflare)</label>
+          <input type="text" id="p-domain" placeholder="crm.mydomain.ua"/>
+        </div>
+        <div class="form-group">
+          <label>Runit сервис (если есть)</label>
+          <input type="text" id="p-service" placeholder="crm"/>
+        </div>
+        <div class="form-group full">
+          <label>Теги (через запятую)</label>
+          <input type="text" id="p-tags" placeholder="Next.js, Prisma, PostgreSQL, Tailwind"/>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top: 1.25rem;">
+        <button type="button" id="btn-cancel-project" class="btn-ghost">Отмена</button>
+        <button type="submit" class="btn-primary-sm">Сохранить проект</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ТОСТ УВЕДОМЛЕНИЙ -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
